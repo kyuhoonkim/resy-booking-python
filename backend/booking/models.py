@@ -2,23 +2,26 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from datetime import timedelta
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class User(AbstractUser):
-    ROLE_CHOICES = (
+    ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('restaurant', 'Restaurant'),
         ('diner', 'Diner'),
-    )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    ]
     
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='diner')
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+
     def __str__(self):
         return f"{self.username} ({self.role})"
 
 class Restaurant(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='restaurant_profile')
     name = models.CharField(max_length=100)
     cuisine = models.CharField(max_length=50, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='restaurant_profile')
     
     def __str__(self):
         return self.name
@@ -31,8 +34,9 @@ class Availability(models.Model):
     is_blocked = models.BooleanField(default=False)
     
     class Meta:
+        verbose_name_plural = "Availabilities"
         unique_together = ['restaurant', 'date', 'start_time']
-        ordering = ['date', 'start_time']
+        ordering = ['date', 'restaurant', 'start_time']
     
     def __str__(self):
         return f"{self.restaurant.name} - {self.date} {self.start_time}"
