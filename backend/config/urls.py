@@ -21,6 +21,6 @@ from rest_framework.authtoken import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('booking.urls')),
+    path('api/v1/', include('booking.urls')),  # Version 1 of our API
     path('api-auth/', include('rest_framework.urls')),  # For session authentication
 ]
